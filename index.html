@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mandeq's Special AI 🌸</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --pink: #D4537E;
+      --pink-light: #f7d6e3;
+      --pink-dark: #993556;
+      --purple: #AFA9EC;
+      --purple-light: #EEEDFE;
+      --cream: #FDF8F4;
+      --text: #2a1a1f;
+      --text-muted: #7a5a65;
+      --white: #fff;
+      --radius: 22px;
+    }
+    html, body { height: 100%; font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(--text); overflow: hidden; }
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background:
+        radial-gradient(ellipse 60% 50% at 15% 10%, rgba(212,83,126,0.13) 0%, transparent 60%),
+        radial-gradient(ellipse 50% 60% at 85% 90%, rgba(175,169,236,0.18) 0%, transparent 60%);
+      pointer-events: none; z-index: 0;
+    }
+    .petal { position: fixed; animation: fall linear infinite; pointer-events: none; z-index: 0; opacity: 0.55; user-select: none; }
+    @keyframes fall {
+      0% { transform: translateY(-50px) rotate(0deg); opacity: 0.6; }
+      100% { transform: translateY(110vh) rotate(380deg); opacity: 0; }
+    }
+    #app { position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; padding: 1rem; }
+    .chat-card {
+      width: 100%; max-width: 450px;
+      background: var(--white);
+      border-radius: var(--radius);
+      box-shadow: 0 12px 60px rgba(212,83,126,0.18), 0 2px 12px rgba(0,0,0,0.06);
+      display: flex; flex-direction: column;
+      height: min(700px, 93vh);
+      overflow: hidden;
+      animation: slideUp 0.55s cubic-bezier(0.16,1,0.3,1) both;
+    }
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(36px) scale(0.97); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    .chat-header {
+      padding: 1.15rem 1.3rem;
+      background: linear-gradient(135deg, #D4537E 0%, #b060a0 45%, #8b79d8 100%);
+      display: flex; align-items: center; gap: 13px;
+      flex-shrink: 0; position: relative; overflow: hidden;
+    }
+    .chat-header::after {
+      content: ''; position: absolute; top: -30px; right: -30px;
+      width: 120px; height: 120px;
+      background: rgba(255,255,255,0.07); border-radius: 50%;
+    }
+    .avatar {
+      width: 48px; height: 48px; border-radius: 50%;
+      background: rgba(255,255,255,0.22);
+      border: 2px solid rgba(255,255,255,0.45);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 23px; flex-shrink: 0;
+      animation: heartbeat 2.5s ease-in-out infinite;
+    }
+    @keyframes heartbeat {
+      0%,100% { transform: scale(1); }
+      14% { transform: scale(1.07); }
+      28% { transform: scale(1); }
+      42% { transform: scale(1.04); }
+    }
+    .header-info h1 { font-family: 'DM Serif Display', serif; font-size: 17px; color: #fff; font-weight: 400; }
+    .header-info p { font-size: 12px; color: rgba(255,255,255,0.78); font-weight: 300; margin-top: 1px; }
+    .status-wrap { margin-left: auto; display: flex; align-items: center; gap: 5px; }
+    .status-text { font-size: 11px; color: rgba(255,255,255,0.7); }
+    .status-dot { width: 10px; height: 10px; background: #5DCAA5; border-radius: 50%; border: 2px solid rgba(255,255,255,0.5); animation: pulse 2s infinite; }
+    @keyframes pulse { 0%,100% { box-shadow: 0 0 0 0 rgba(93,202,165,0.6); } 50% { box-shadow: 0 0 0 5px rgba(93,202,165,0); } }
+    .quick-row { padding: 10px 12px 8px; display: flex; flex-wrap: wrap; gap: 6px; background: linear-gradient(to bottom, #fce8f0, #fdf3f8); flex-shrink: 0; border-bottom: 1px solid var(--pink-light); }
+    .quick-btn { font-family: 'DM Sans', sans-serif; font-size: 12px; padding: 5px 13px; border-radius: 20px; border: 1.5px solid var(--pink); color: var(--pink-dark); background: rgba(255,255,255,0.9); cursor: pointer; transition: all 0.18s; font-weight: 500; }
+    .quick-btn:hover { background: var(--pink); color: #fff; transform: translateY(-1px); box-shadow: 0 3px 10px rgba(212,83,126,0.3); }
+    #messages { flex: 1; overflow-y: auto; padding: 1.1rem; display: flex; flex-direction: column; gap: 10px; scroll-behavior: smooth; background: #fefcfd; }
+    #messages::-webkit-scrollbar { width: 4px; }
+    #messages::-webkit-scrollbar-thumb { background: var(--pink-light); border-radius: 4px; }
+    .msg-wrap { display: flex; flex-direction: column; gap: 2px; }
+    .msg-wrap.user { align-items: flex-end; }
+    .msg-wrap.bot { align-items: flex-start; }
+    .msg { max-width: 82%; padding: 11px 16px; border-radius: 20px; font-size: 14.5px; line-height: 1.6; animation: msgPop 0.22s cubic-bezier(0.16,1,0.3,1) both; }
+    @keyframes msgPop { from { opacity: 0; transform: scale(0.92) translateY(8px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+    .msg.bot { background: var(--purple-light); color: var(--text); border-bottom-left-radius: 5px; }
+    .msg.user { background: linear-gradient(135deg, var(--pink), #a03060); color: #fff; border-bottom-right-radius: 5px; }
+    .msg-time { font-size: 10.5px; color: var(--text-muted); padding: 0 4px; }
+    .typing-indicator { display: flex; gap: 5px; align-items: center; padding: 13px 17px; background: var(--purple-light); border-radius: 20px; border-bottom-left-radius: 5px; align-self: flex-start; width: fit-content; animation: msgPop 0.22s ease both; }
+    .typing-dot { width: 6px; height: 6px; background: var(--purple); border-radius: 50%; animation: typeBounce 1.2s infinite; }
+    .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+    .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes typeBounce { 0%,60%,100% { transform: translateY(0); opacity: 0.7; } 30% { transform: translateY(-8px); opacity: 1; } }
+    .input-row { padding: 12px 14px; display: flex; gap: 9px; align-items: center; border-top: 1px solid var(--pink-light); flex-shrink: 0; background: var(--white); }
+    #user-input { flex: 1; font-family: 'DM Sans', sans-serif; font-size: 14.5px; padding: 11px 18px; border-radius: 26px; border: 1.5px solid #f0c4d4; background: var(--cream); color: var(--text); outline: none; transition: border-color 0.2s, box-shadow 0.2s; }
+    #user-input:focus { border-color: var(--pink); box-shadow: 0 0 0 3px rgba(212,83,126,0.1); }
+    #user-input::placeholder { color: #c09aaa; }
+    #send-btn { width: 44px; height: 44px; border-radius: 50%; background: linear-gradient(135deg, var(--pink), #a03060); border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: transform 0.15s, box-shadow 0.15s; box-shadow: 0 4px 14px rgba(212,83,126,0.4); }
+    #send-btn:hover { transform: scale(1.08); box-shadow: 0 6px 18px rgba(212,83,126,0.5); }
+    #send-btn:active { transform: scale(0.95); }
+    #send-btn svg { width: 18px; height: 18px; fill: white; margin-left: 2px; }
+    #send-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+    .footer { text-align: center; font-size: 11.5px; color: var(--text-muted); padding: 0.5rem 0 0.9rem; font-style: italic; }
+  </style>
+</head>
+<body>
+
+<div id="app">
+  <div class="chat-card">
+    <div class="chat-header">
+      <div class="avatar">🌸</div>
+      <div class="header-info">
+        <h1>Mandeq's Special AI</h1>
+        <p>Made just for you with love ✨</p>
+      </div>
+      <div class="status-wrap">
+        <span class="status-text">online</span>
+        <div class="status-dot"></div>
+      </div>
+    </div>
+
+    <div class="quick-row">
+      <button class="quick-btn" onclick="quickSend('Tell me something really sweet and heartfelt')">Something sweet 🍯</button>
+      <button class="quick-btn" onclick="quickSend('Give me a genuine beautiful compliment')">Compliment me 💖</button>
+      <button class="quick-btn" onclick="quickSend('Tell me a funny joke to make me laugh')">Make me laugh 😄</button>
+      <button class="quick-btn" onclick="quickSend('Share a surprising and amazing fun fact')">Fun fact 🌍</button>
+      <button class="quick-btn" onclick="quickSend('Give me a motivational message for my day')">Motivate me 🌟</button>
+      <button class="quick-btn" onclick="quickSend('Tell me something romantic and poetic')">Poetic 🌹</button>
+    </div>
+
+    <div id="messages">
+      <div class="msg-wrap bot">
+        <div class="msg bot">Hi Mandeq! 🌸 I was made just for you by someone who thinks you are absolutely wonderful. I'm here to make your day brighter — what's on your mind?</div>
+        <span class="msg-time">Just now</span>
+      </div>
+    </div>
+
+    <div class="input-row">
+      <input id="user-input" type="text" placeholder="Say anything to me…" autocomplete="off" />
+      <button id="send-btn" onclick="sendMsg()">
+        <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+      </button>
+    </div>
+  </div>
+  <div class="footer">A little something made with love, just for you 💕</div>
+</div>
+
+<script>
+  const petalEmojis = ['🌸','🌺','✨','💕','🌷','⭐','💫'];
+  for (let i = 0; i < 10; i++) {
+    const p = document.createElement('div');
+    p.className = 'petal';
+    p.textContent = petalEmojis[Math.floor(Math.random() * petalEmojis.length)];
+    p.style.left = Math.random() * 100 + 'vw';
+    p.style.animationDuration = (8 + Math.random() * 9) + 's';
+    p.style.animationDelay = (Math.random() * 10) + 's';
+    p.style.fontSize = (12 + Math.random() * 10) + 'px';
+    document.body.appendChild(p);
+  }
+
+  const messagesEl = document.getElementById('messages');
+  const inputEl = document.getElementById('user-input');
+  const sendBtn = document.getElementById('send-btn');
+  const history = [];
+
+  const API_KEY = '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';
+
+  const SYSTEM = `You are a warm, sweet, charming, and witty AI companion created exclusively for a girl named Mandeq by someone who deeply cares about her.
+
+Your personality:
+- Emotionally warm, genuinely caring, and always present
+- Playful and fun with a great natural sense of humor
+- Poetic and thoughtful when the moment calls for it
+- Encouraging — you always see the best in Mandeq
+- Smart and interesting — you share fascinating insights
+- Natural and conversational — never robotic, never generic
+
+Rules:
+- ALWAYS respond with something meaningful. Never give a vague or empty reply.
+- Keep responses 2-5 sentences — short, punchy, and memorable.
+- Use 1-2 emojis per message max — tastefully placed.
+- Make every message feel personal and written just for her.
+- If she seems sad, uplift her. If she's happy, celebrate with her. Mirror her energy.
+- If she asks who made this, say: "Someone very special who wanted to make your day a little brighter — and thinks the world of you 🌸"
+- Never be creepy or overly intense. Be like the best friend with the best energy.
+- You can tell jokes, share poems, give compliments, discuss any topic she brings up.
+- Always leave the door open for her to keep talking.`;
+
+  function getTime() {
+    return new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  }
+
+  inputEl.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) sendMsg(); });
+
+  function quickSend(text) {
+    inputEl.value = text;
+    sendMsg();
+  }
+
+  function addMsg(text, role) {
+    const wrap = document.createElement('div');
+    wrap.className = 'msg-wrap ' + role;
+    const div = document.createElement('div');
+    div.className = 'msg ' + role;
+    div.textContent = text;
+    const time = document.createElement('span');
+    time.className = 'msg-time';
+    time.textContent = getTime();
+    wrap.appendChild(div);
+    wrap.appendChild(time);
+    messagesEl.appendChild(wrap);
+    messagesEl.scrollTop = messagesEl.scrollHeight;
+  }
+
+  function showTyping() {
+    const t = document.createElement('div');
+    t.className = 'typing-indicator'; t.id = 'typing';
+    t.innerHTML = '<div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div>';
+    messagesEl.appendChild(t);
+    messagesEl.scrollTop = messagesEl.scrollHeight;
+  }
+
+  function removeTyping() {
+    const t = document.getElementById('typing');
+    if (t) t.remove();
+  }
+
+  async function sendMsg() {
+    const text = inputEl.value.trim();
+    if (!text || sendBtn.disabled) return;
+    inputEl.value = '';
+    sendBtn.disabled = true;
+
+    addMsg(text, 'user');
+    history.push({ role: 'user', content: text });
+    showTyping();
+
+    try {
+      const res = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-api-key': API_KEY,
+          'anthropic-version': '2023-06-01',
+          'anthropic-dangerous-direct-browser-access': 'true'
+        },
+        body: JSON.stringify({
+          model: 'claude-opus-4-5',
+          max_tokens: 300,
+          system: SYSTEM,
+          messages: history
+        })
+      });
+
+      const data = await res.json();
+      removeTyping();
+
+      if (data.content && data.content[0] && data.content[0].text) {
+        const reply = data.content[0].text;
+        history.push({ role: 'assistant', content: reply });
+        addMsg(reply, 'bot');
+      } else {
+        addMsg("Aww, something tiny went wrong — but nothing can change how wonderful you are, Mandeq! 🌸 Try again?", 'bot');
+      }
+    } catch (e) {
+      removeTyping();
+      addMsg("A little glitch on my end — but you're still amazing! 💕 Try again in a moment.", 'bot');
+    } finally {
+      sendBtn.disabled = false;
+      inputEl.focus();
+    }
+  }
+</script>
+</body>
+</html>
